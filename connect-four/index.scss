@@ -1,0 +1,50 @@
+#board {
+  width: 148px;
+  margin: 40px auto 0;
+}
+.row {
+  height: 20px;
+  border-left: 1px solid;
+}
+
+.square {
+  width: 20px;
+  height: 20px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+  display: inline-block;
+  &.red::after {
+    color: firebrick;
+    content: '●';
+    font-size: 36px;
+    line-height: 21px;
+    position: fixed;
+  }
+  &.blue::after {
+    color: dodgerblue;
+    content: '●';
+    font-size: 36px;
+    line-height: 21px;
+    position: fixed;
+  }
+}
+
+#cursor {
+  text-align: center;
+  width: 20px;
+
+  &.red {
+    color: firebrick;
+  }
+
+  &.blue {
+    color: dodgerblue;
+  }
+
+  @for $i from 0 through 6 {
+    &.p#{$i} {
+      margin-left: 1px + $i * 21px
+    }
+  }
+}
+

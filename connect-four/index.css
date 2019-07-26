@@ -1,0 +1,51 @@
+@charset "UTF-8";
+#board {
+  width: 148px;
+  margin: 40px auto 0; }
+
+.row {
+  height: 20px;
+  border-left: 1px solid; }
+
+.square {
+  width: 20px;
+  height: 20px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+  display: inline-block; }
+  .square.red::after {
+    color: firebrick;
+    content: '●';
+    font-size: 36px;
+    line-height: 21px;
+    position: fixed; }
+  .square.blue::after {
+    color: dodgerblue;
+    content: '●';
+    font-size: 36px;
+    line-height: 21px;
+    position: fixed; }
+
+#cursor {
+  text-align: center;
+  width: 20px; }
+  #cursor.red {
+    color: firebrick; }
+  #cursor.blue {
+    color: dodgerblue; }
+  #cursor.p0 {
+    margin-left: 1px; }
+  #cursor.p1 {
+    margin-left: 22px; }
+  #cursor.p2 {
+    margin-left: 43px; }
+  #cursor.p3 {
+    margin-left: 64px; }
+  #cursor.p4 {
+    margin-left: 85px; }
+  #cursor.p5 {
+    margin-left: 106px; }
+  #cursor.p6 {
+    margin-left: 127px; }
+
+/*# sourceMappingURL=index.css.map */
