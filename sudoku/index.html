@@ -6,11 +6,11 @@
 			table-layout: fixed;
 			width: 100%;
 			tr {
-				&:nth-child(3n) {
+				&:last-child {
 					border-bottom: 2px solid black;
 				}
 
-				&:nth-child(3n + 1) {
+				&:nth-child(XXXn + 1) {
 					border-top: 2px solid black;
 				}
 			}
@@ -20,11 +20,11 @@
 				height: 50px;
 				text-align: center;
 
-				&:nth-child(3n) {
+				&:nth-child(XXXn) {
 					border-right: 2px solid black;
 				}
 
-				&:nth-child(3n + 1) {
+				&:first-child {
 					border-left: 2px solid black;
 				}
 			}
@@ -33,10 +33,14 @@
 
 	<script src="backtracking.js" defer type="module"></script>
 	<script defer type="module">
-		import { test } from './backtracking.js'
-		test()
+		// import { test } from './backtracking.js'
+
+		const style = document.head.querySelector('style')
+		const n = 4
+		style.textContent = style.textContent.replaceAll('XXX', n)
+		// test(n * n)
+		import { generateBoard } from './sudoku.js'
+		generateBoard(n * n)
 	</script>
 </head>
-<body>
-	world
-</body>
+<body></body>

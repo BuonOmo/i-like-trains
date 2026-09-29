@@ -1,25 +1,26 @@
-const test = () => {
-	let board = Array.from({ length: 9 }, () => Array(9).fill(0))
+import { shuffle } from './utils.js'
+
+const test = async (length = 9) => {
+	let board = Array.from({ length: length }, () => Array(length).fill(0))
+	await sleep()
 	show(board)
 	console.log('starting backtracking')
-	backtracking(board)
-	show(board)
+	for (const _ of backtracking(board)) {
+		await sleep()
+		show(board)
+	}
 }
 
-const shuffle = (ary) => {
-	for (let i = 0; i < ary.length; i++) {
-		let swap = ary[i]
-		let rand = Math.floor(Math.random() * ary.length)
-		ary[i] = ary[rand]
-		ary[rand] = swap
-	}
+async function sleep() {
+	// If you want no animation but a fast response, just comment that.
+	return new Promise(requestAnimationFrame)
 }
 
 const show = (board) => {
 	const table = document.createElement('table')
-	for (let i = 0; i < 9; i++) {
+	for (let i = 0; i < board.length; i++) {
 		const row = document.createElement('tr')
-		for (let j = 0; j < 9; j++) {
+		for (let j = 0; j < board.length; j++) {
 			const cell = document.createElement('td')
 			cell.textContent = board[i][j] === 0 ? '' : board[i][j]
 			row.appendChild(cell)
@@ -36,8 +37,8 @@ const update = (x, y, value) => {
 }
 
 const isFilled = (board) => {
-	for (let i = 0; i < 9; i++) {
-		for (let j = 0; j < 9; j++) {
+	for (let i = 0; i < board.length; i++) {
+		for (let j = 0; j < board.length; j++) {
 			if (board[i][j] === 0) return false
 		}
 	}
@@ -45,15 +46,18 @@ const isFilled = (board) => {
 }
 
 const isValid = (board) => {
-	for (let i = 0; i < 9; i++) {
+	const sqrt = Math.sqrt(board.length)
+	for (let i = 0; i < board.length; i++) {
 		const rowSet = new Set()
 		const colSet = new Set()
 		const boxSet = new Set()
-		for (let j = 0; j < 9; j++) {
+		for (let j = 0; j < board.length; j++) {
 			const rowVal = board[i][j]
 			const colVal = board[j][i]
 			const boxVal =
-				board[Math.floor(i / 3) * 3 + Math.floor(j / 3)][(i % 3) * 3 + (j % 3)]
+				board[Math.floor(i / sqrt) * sqrt + Math.floor(j / sqrt)][
+					(i % sqrt) * sqrt + (j % sqrt)
+				]
 
 			if (rowVal !== 0) {
 				if (rowSet.has(rowVal)) return false
@@ -75,29 +79,43 @@ const isValid = (board) => {
 }
 
 const findEmptyCell = (board) => {
-	for (let i = 0; i < 9; i++) {
-		for (let j = 0; j < 9; j++) {
+	for (let i = 0; i < board.length; i++) {
+		for (let j = 0; j < board.length; j++) {
 			if (board[i][j] === 0) return [i, j]
 		}
 	}
 }
 
-const backtracking = (board) => {
+const validNumbers = (board, x, y) => {
+	const valid = new Set(Array.from({ length: board.length }, (_, i) => i + 1))
+	const sqrt = Math.sqrt(board.length)
+
+	for (let i = 0; i < board.length; i++) {
+		valid.delete(board[x][i]) // Row
+		valid.delete(board[i][y]) // Column
+		valid.delete(
+			board[Math.floor(x / sqrt) * sqrt + Math.floor(i / sqrt)][
+				Math.floor(y / sqrt) * sqrt + (i % sqrt)
+			],
+		) // Box
+	}
+
+	return Array.from(valid)
+}
+
+const backtracking = function (board) {
 	// Stop condition
-	if (isFilled(board)) return true
 	if (!isValid(board)) return false
+	if (isFilled(board)) return true
 
 	const [x, y] = findEmptyCell(board)
 
-	let randNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-	shuffle(randNumbers)
+	let randNumbers = shuffle(validNumbers(board, x, y))
 
 	for (const number of randNumbers) {
 		board[x][y] = number
-		update(x, y, number)
 		if (backtracking(board)) return true
 		board[x][y] = 0
-		update(x, y, 0)
 	}
 
 	return false
@@ -105,5 +123,19 @@ const backtracking = (board) => {
 
 // TODO: Implement a multi-solutions solver that counts
 //   the number of solutions for a given board
+
+export const countSolutions = (board, count = 0) => {
+	if (!isValid(board)) return 0
+	if (isFilled(board)) return 1
+
+	const [x, y] = findEmptyCell(board)
+	for (const number of validNumbers(board, x, y)) {
+		board[x][y] = number
+		count += countSolutions(board, count)
+		board[x][y] = 0
+	}
+
+	return count
+}
 
 export { test, backtracking }
