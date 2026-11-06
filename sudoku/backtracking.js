@@ -1,41 +1,5 @@
 import { shuffle } from './utils.js'
 
-const test = async (length = 9) => {
-	let board = Array.from({ length: length }, () => Array(length).fill(0))
-	await sleep()
-	show(board)
-	console.log('starting backtracking')
-	for (const _ of backtracking(board)) {
-		await sleep()
-		show(board)
-	}
-}
-
-async function sleep() {
-	// If you want no animation but a fast response, just comment that.
-	return new Promise(requestAnimationFrame)
-}
-
-const show = (board) => {
-	const table = document.createElement('table')
-	for (let i = 0; i < board.length; i++) {
-		const row = document.createElement('tr')
-		for (let j = 0; j < board.length; j++) {
-			const cell = document.createElement('td')
-			cell.textContent = board[i][j] === 0 ? '' : board[i][j]
-			row.appendChild(cell)
-		}
-		table.appendChild(row)
-	}
-	document.body.innerHTML = ''
-	document.body.appendChild(table)
-}
-
-const update = (x, y, value) => {
-	document.querySelectorAll('tr')[x].querySelectorAll('td')[y].textContent =
-		value === 0 ? '' : value
-}
-
 const isFilled = (board) => {
 	for (let i = 0; i < board.length; i++) {
 		for (let j = 0; j < board.length; j++) {
@@ -121,10 +85,7 @@ const backtracking = function (board) {
 	return false
 }
 
-// TODO: Implement a multi-solutions solver that counts
-//   the number of solutions for a given board
-
-export const countSolutions = (board, count = 0) => {
+const countSolutions = (board, count = 0) => {
 	if (!isValid(board)) return 0
 	if (isFilled(board)) return 1
 
@@ -138,4 +99,4 @@ export const countSolutions = (board, count = 0) => {
 	return count
 }
 
-export { test, backtracking }
+export { countSolutions, backtracking }

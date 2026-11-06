@@ -1,12 +1,6 @@
 import { backtracking, countSolutions } from './backtracking.js'
 import { nav, shuffle } from './utils.js'
 
-const count = (board) => {
-	board.reduce((acc, line) => {
-		acc + line.reduce((acc, curr) => (curr > 0 ? acc + 1 : acc), 0)
-	}, 0)
-}
-
 const removeRandomElements = (board, num) => {
 	let nonEmptyCells = []
 	for (const [x, y] of nav(board)) {
@@ -41,13 +35,11 @@ export const generateBoard = (size = 9) => {
 		})
 	}
 	backtracking(board)
-	// TODO: remove elements one by one and counsolutions at that moment
 	removeRandomElements(board, Math.floor((size * size) / 4))
 	while (countSolutions(board) > 1) {
 		backtracking(board)
 		removeRandomElements(board, Math.floor((size * size) / 4))
 	}
-	console.log(countSolutions(board))
 	return board
 }
 
@@ -63,20 +55,4 @@ const generateTable = (size) => {
 		table.appendChild(row)
 	}
 	document.body.appendChild(table)
-}
-
-const print = (board) => {
-	for (let i = 0; i < board.length; i++) {
-		for (let j = 0; j < board.length; j++) {
-			const cell = document.getElementById(`cell-${i}-${j}`)
-			if (+cell.textContent !== board[i][j]) {
-				if (board[i][j] === 0) cell.textContent = ''
-				else cell.textContent = board[i][j]
-			}
-		}
-	}
-}
-
-const fillBoard = (board) => {
-	backtracking(board)
 }
