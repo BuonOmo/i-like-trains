@@ -1,6 +1,10 @@
 import { backtracking, countSolutions } from './backtracking.js'
 import { nav, shuffle } from './utils.js'
 
+Object.prototype.andThen = function (callback) {
+	return callback(this)
+}
+
 const removeRandomElements = (board, num) => {
 	let nonEmptyCells = []
 	for (const [x, y] of nav(board)) {
@@ -15,25 +19,20 @@ const removeRandomElements = (board, num) => {
 	}
 }
 
-export const generateBoard = (size = 9) => {
-	const board = Array.from({ length: size }, () => Array(size).fill(0))
+const startGame = (size = 9) => {
+	const board = generateBoard(size)
 	generateTable(size)
-	console.log('table ok')
-	for (let i = 0; i < board.length; i++) {
-		board[i] = new Proxy(board[i], {
-			get(target, name) {
-				return target[name]
-			},
-			set(target, name, value) {
-				requestAnimationFrame(() => {
-					document.getElementById(`cell-${i}-${name}`).textContent =
-						value == 0 ? '' : value
-				})
-				target[name] = value
-				return true
-			},
-		})
+	for (const [x, y] of nav(board)) {
+		if (board[x][y] === 0) continue
+
+		const el = document.getElementById(`cell-${x}-${y}`)
+		el.textContent = board[x][y]
+		el.classList.add('prefilled')
 	}
+	return board
+}
+const generateBoard = (size = 9) => {
+	const board = Array.from({ length: size }, () => Array(size).fill(0))
 	backtracking(board)
 	removeRandomElements(board, Math.floor((size * size) / 4))
 	while (countSolutions(board) > 1) {
@@ -49,10 +48,86 @@ const generateTable = (size) => {
 		const row = document.createElement('tr')
 		for (let j = 0; j < size; j++) {
 			const cell = document.createElement('td')
-			cell.setAttribute('id', `cell-${i}-${j}`) // TODO: use that?
+			cell.setAttribute('id', `cell-${i}-${j}`)
 			row.appendChild(cell)
 		}
 		table.appendChild(row)
 	}
-	document.body.appendChild(table)
+	document.getElementById('wrapper').appendChild(table)
 }
+
+const gameLoop = async (keyCodes, board) => {
+	const layoutMap = await navigator.keyboard.getLayoutMap()
+	const keyMapping = Object.keys(keyCodes)
+		.map((code) => [code, layoutMap.get(code).toUpperCase()])
+		.andThen(Object.fromEntries)
+
+	setKeyMapping(keyMapping)
+
+	let selectedGroup = null
+	let selectedCell = null
+	return function listener(event) {
+		console.log({
+			selectedGroup,
+			selectedCell,
+			event,
+			board,
+		})
+
+		// State update
+		if (!keyCodes[event.code]) return
+		const [x, y] = keyCodes[event.code]
+		if (!selectedGroup) {
+			selectedGroup = [x, y]
+		} else if (!selectedCell) {
+			const [gX, gY] = selectedGroup
+			const pX = gX * 3 + x
+			const pY = gY * 3 + y
+			if (
+				!document
+					.getElementById(`cell-${pX}-${pY}`)
+					.classList.contains('prefilled')
+			)
+				selectedCell = [pX, pY]
+		} else {
+			const [pX, pY] = selectedCell
+			const value = x + 3 * y + 1
+			board[pX][pY] = value
+			document.getElementById(`cell-${pX}-${pY}`).textContent = value
+			selectedCell = null
+			selectedGroup = null
+		}
+
+		// Print helper
+		if (!selectedGroup) {
+			showGroupHelper()
+		} else if (!selectedCell) {
+			showCellHelper(selectedGroup)
+		} else {
+			showValueHelper()
+		}
+	}
+}
+
+const setKeyMapping = (keyMapping) => {
+	for (let [code, value] of Object.entries(keyMapping)) {
+		document.querySelector(`.helper-${code}`).textContent = value
+	}
+}
+
+const showGroupHelper = () => {
+	const helper = document.querySelector('.helper')
+	helper.classList = 'helper global'
+}
+
+const showCellHelper = ([row, col]) => {
+	const helper = document.querySelector('.helper')
+
+	helper.classList = `helper group col-${col} row-${row}`
+}
+
+const showValueHelper = () => {
+	// TODO
+}
+
+export { startGame, gameLoop }

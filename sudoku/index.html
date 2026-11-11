@@ -1,31 +1,90 @@
 <head>
 	<!-- CSS for table -->
 	<style>
+		#wrapper {
+			position: relative;
+			width: 90vmin;
+			height: 90vmin;
+			margin: 0 auto;
+		}
+
 		table {
+			box-sizing: content-box;
 			border-collapse: collapse;
 			table-layout: fixed;
-			width: 100%;
-			tr {
-				&:last-child {
-					border-bottom: 2px solid black;
+			tr td {
+				text-align: center;
+			}
+
+			&.helper {
+				background: color-mix(in srgb, pink, transparent 80%);
+				position: absolute;
+				&.global {
+					top: 0;
+					left: 0;
+					width: 100%;
+					height: 100%;
+					td {
+						font-size: 10em;
+					}
+				}
+				&.group {
+					width: 33.333%;
+					height: 33.333%;
+				}
+				&.col-0 {
+					left: 0;
+				}
+				&.col-1 {
+					left: 33.333%;
+				}
+				&.col-2 {
+					left: 66.666%;
+				}
+				&.row-0 {
+					top: 0;
+				}
+				&.row-1 {
+					top: 33.333%;
+				}
+				&.row-2 {
+					top: 66.666%;
 				}
 
-				&:nth-child(XXXn + 1) {
-					border-top: 2px solid black;
+				td {
+					border: 2px solid pink;
+					font-weight: bolder;
+					font-family: sans-serif;
+					color: color-mix(in srgb, pink, transparent);
 				}
 			}
-			td {
-				border: 1px solid gray;
-				width: 50px;
-				height: 50px;
-				text-align: center;
+			&:not(.helper) {
+				width: 100%;
+				height: 100%;
 
-				&:nth-child(XXXn) {
-					border-right: 2px solid black;
+				tr {
+					&:last-child {
+						border-bottom: 2px solid black;
+					}
+
+					&:nth-child(XXXn + 1) {
+						border-top: 2px solid black;
+					}
 				}
+				td {
+					border: 1px solid gray;
 
-				&:first-child {
-					border-left: 2px solid black;
+					&:nth-child(XXXn) {
+						border-right: 2px solid black;
+					}
+
+					&:first-child {
+						border-left: 2px solid black;
+					}
+
+					&.prefilled {
+						background-color: lightgray;
+					}
 				}
 			}
 		}
@@ -33,14 +92,49 @@
 
 	<script src="backtracking.js" defer type="module"></script>
 	<script defer type="module">
-		// import { test } from './backtracking.js'
+		import { startGame, gameLoop } from './sudoku.js'
+
+		// The first 3x3 square of keys on a keyboard, whatever the layout,
+		// mapped to sudoku board cells.
+		const keyCodes = {
+			KeyQ: [0, 0],
+			KeyW: [0, 1],
+			KeyE: [0, 2],
+			KeyA: [1, 0],
+			KeyS: [1, 1],
+			KeyD: [1, 2],
+			KeyZ: [2, 0],
+			KeyX: [2, 1],
+			KeyC: [2, 2],
+		}
 
 		const style = document.head.querySelector('style')
 		const n = 3
 		style.textContent = style.textContent.replaceAll('XXX', n)
-		// test(n * n)
-		import { generateBoard } from './sudoku.js'
-		generateBoard(n * n)
+		const board = startGame(n * n)
+		console.log(board)
+
+		document.addEventListener('keydown', await gameLoop(keyCodes, board))
 	</script>
 </head>
-<body></body>
+<body>
+	<div id="wrapper">
+		<table class="helper global">
+			<tr>
+				<td class="helper-KeyQ">Q</td>
+				<td class="helper-KeyW">W</td>
+				<td class="helper-KeyE">E</td>
+			</tr>
+			<tr>
+				<td class="helper-KeyA">A</td>
+				<td class="helper-KeyS">S</td>
+				<td class="helper-KeyD">D</td>
+			</tr>
+			<tr>
+				<td class="helper-KeyZ">Z</td>
+				<td class="helper-KeyX">X</td>
+				<td class="helper-KeyC">C</td>
+			</tr>
+		</table>
+	</div>
+</body>
