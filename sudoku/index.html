@@ -1,11 +1,32 @@
 <head>
 	<!-- CSS for table -->
 	<style>
+		:root {
+			font-family: sans-serif;
+		}
+		.hidden {
+			display: none;
+		}
+
 		#wrapper {
 			position: relative;
 			width: 90vmin;
 			height: 90vmin;
 			margin: 0 auto;
+		}
+
+		.local-helper {
+			position: absolute;
+			/* The 2px removed are table borders computations. */
+			width: calc(100% / 9 - 2px);
+			height: calc(100% / 9 - 2px);
+			border: 2px solid pink;
+			color: color-mix(in srgb, pink, transparent);
+			font-size: 2em;
+			font-weight: bolder;
+			display: flex;
+			justify-content: center;
+			align-items: center;
 		}
 
 		table {
@@ -31,6 +52,9 @@
 				&.group {
 					width: 33.333%;
 					height: 33.333%;
+					td {
+						font-size: 4em;
+					}
 				}
 				&.col-0 {
 					left: 0;
@@ -54,7 +78,6 @@
 				td {
 					border: 2px solid pink;
 					font-weight: bolder;
-					font-family: sans-serif;
 					color: color-mix(in srgb, pink, transparent);
 				}
 			}
@@ -72,6 +95,7 @@
 					}
 				}
 				td {
+					font-size: 3em;
 					border: 1px solid gray;
 
 					&:nth-child(XXXn) {
@@ -94,18 +118,18 @@
 	<script defer type="module">
 		import { startGame, gameLoop } from './sudoku.js'
 
-		// The first 3x3 square of keys on a keyboard, whatever the layout,
+		// The left-hand centered 3x3 square of keys on a keyboard, whatever the layout,
 		// mapped to sudoku board cells.
 		const keyCodes = {
-			KeyQ: [0, 0],
-			KeyW: [0, 1],
-			KeyE: [0, 2],
-			KeyA: [1, 0],
-			KeyS: [1, 1],
-			KeyD: [1, 2],
-			KeyZ: [2, 0],
-			KeyX: [2, 1],
-			KeyC: [2, 2],
+			KeyW: [0, 0],
+			KeyE: [0, 1],
+			KeyR: [0, 2],
+			KeyS: [1, 0],
+			KeyD: [1, 1],
+			KeyF: [1, 2],
+			KeyX: [2, 0],
+			KeyC: [2, 1],
+			KeyV: [2, 2],
 		}
 
 		const style = document.head.querySelector('style')
@@ -119,21 +143,22 @@
 </head>
 <body>
 	<div id="wrapper">
+		<div class="local-helper hidden"></div>
 		<table class="helper global">
 			<tr>
-				<td class="helper-KeyQ">Q</td>
-				<td class="helper-KeyW">W</td>
-				<td class="helper-KeyE">E</td>
+				<td class="helper-KeyW">Q</td>
+				<td class="helper-KeyE">W</td>
+				<td class="helper-KeyR">E</td>
 			</tr>
 			<tr>
-				<td class="helper-KeyA">A</td>
 				<td class="helper-KeyS">S</td>
 				<td class="helper-KeyD">D</td>
+				<td class="helper-KeyF">F</td>
 			</tr>
 			<tr>
-				<td class="helper-KeyZ">Z</td>
 				<td class="helper-KeyX">X</td>
 				<td class="helper-KeyC">C</td>
+				<td class="helper-KeyV">V</td>
 			</tr>
 		</table>
 	</div>

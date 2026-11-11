@@ -104,7 +104,7 @@ const gameLoop = async (keyCodes, board) => {
 		} else if (!selectedCell) {
 			showCellHelper(selectedGroup)
 		} else {
-			showValueHelper()
+			showValueHelper(selectedCell, keyMapping)
 		}
 	}
 }
@@ -116,18 +116,34 @@ const setKeyMapping = (keyMapping) => {
 }
 
 const showGroupHelper = () => {
+	document.querySelector('.local-helper').classList.add('hidden')
 	const helper = document.querySelector('.helper')
 	helper.classList = 'helper global'
 }
 
 const showCellHelper = ([row, col]) => {
+	document.querySelector('.local-helper').classList.add('hidden')
 	const helper = document.querySelector('.helper')
 
 	helper.classList = `helper group col-${col} row-${row}`
 }
 
-const showValueHelper = () => {
-	// TODO
+let valueHelperInterval = null
+const showValueHelper = ([row, col], keyMapping) => {
+	document.querySelector('.helper').classList.add('hidden')
+	const helper = document.querySelector('.local-helper')
+	helper.style.top = `calc(${row} * (100% / 9)`
+	helper.style.left = `calc(${col} * (100% / 9)`
+	let i = 0
+	helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${i % 9}`
+
+	helper.classList.remove('hidden')
+
+	if (valueHelperInterval) clearInterval(valueHelperInterval)
+	valueHelperInterval = setInterval(() => {
+		i += 1
+		helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${i % 9}`
+	}, 1000)
 }
 
 export { startGame, gameLoop }
