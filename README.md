@@ -3,3 +3,4 @@
 Stuff done while taking trains:
 - [connect four](https://buonomo.github.io/i-like-trains/connect-four/)
 - [sticky game](https://buonomo.github.io/i-like-trains/sticky-game/) — A French version of [dots](https://considerable.com/dots/).
+- [sudoku](https://buonomo.github.io/i-like-trains/sudoku)
