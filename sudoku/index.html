@@ -2,8 +2,25 @@
 	<!-- CSS for table -->
 	<style>
 		:root {
+			@media (prefers-color-scheme: dark) {
+				--accent: plum;
+				--color: white;
+				--border: #ddd;
+				--background: #444;
+			}
+
+			@media (prefers-color-scheme: light) {
+				--color: black;
+				--accent: hotpink;
+				--border: black;
+				--background: #fff;
+			}
+
 			font-family: sans-serif;
+			color: var(--color);
+			background-color: var(--background);
 		}
+
 		.hidden {
 			visibility: hidden;
 			border: initial !important;
@@ -26,8 +43,8 @@
 			/* The 2px removed are table borders computations. */
 			width: calc(100% / 9 - 2px);
 			height: calc(100% / 9 - 2px);
-			border: 2px solid pink;
-			color: color-mix(in srgb, pink, transparent);
+			border: 2px solid var(--accent);
+			color: color-mix(in srgb, var(--accent), transparent);
 			font-size: 2em;
 			font-weight: bolder;
 			display: flex;
@@ -44,7 +61,6 @@
 			}
 
 			&.helper {
-				background: color-mix(in srgb, pink, transparent 80%);
 				position: absolute;
 				&.global {
 					top: 0;
@@ -56,8 +72,8 @@
 					}
 				}
 				&.group {
-					width: 33.333%;
-					height: 33.333%;
+					width: calc(100% / 3);
+					height: calc(100% / 3);
 					td {
 						font-size: 4em;
 					}
@@ -66,25 +82,30 @@
 					left: 0;
 				}
 				&.col-1 {
-					left: 33.333%;
+					left: calc(100% / 3);
 				}
 				&.col-2 {
-					left: 66.666%;
+					left: calc(2 * 100% / 3);
 				}
 				&.row-0 {
 					top: 0;
 				}
 				&.row-1 {
-					top: 33.333%;
+					top: calc(100% / 3);
 				}
 				&.row-2 {
-					top: 66.666%;
+					top: calc(2 * 100% / 3);
 				}
 
 				td {
-					border: 2px solid pink;
+					border: 2px solid var(--accent);
 					font-weight: bolder;
-					color: color-mix(in srgb, pink, transparent);
+					color: color-mix(in srgb, var(--accent), transparent);
+					background: color-mix(
+						in srgb,
+						var(--accent),
+						transparent 80%
+					);
 				}
 			}
 			&:not(.helper) {
@@ -93,27 +114,32 @@
 
 				tr {
 					&:last-child {
-						border-bottom: 2px solid black;
+						border-bottom: 2px solid var(--border);
 					}
 
 					&:nth-child(XXXn + 1) {
-						border-top: 2px solid black;
+						border-top: 2px solid var(--border);
 					}
 				}
 				td {
 					font-size: 3em;
-					border: 1px solid gray;
+					border: 1px solid
+						color-mix(in srgb, var(--border), var(--background));
 
 					&:nth-child(XXXn) {
-						border-right: 2px solid black;
+						border-right: 2px solid var(--border);
 					}
 
 					&:first-child {
-						border-left: 2px solid black;
+						border-left: 2px solid var(--border);
 					}
 
 					&.prefilled {
-						background-color: lightgray;
+						background-color: color-mix(
+							in srgb,
+							var(--background) 80%,
+							var(--color)
+						);
 					}
 				}
 			}
