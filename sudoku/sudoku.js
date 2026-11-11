@@ -63,6 +63,7 @@ const gameLoop = async (keyCodes, board) => {
 		.andThen(Object.fromEntries)
 
 	setKeyMapping(keyMapping)
+	startTimer()
 
 	let selectedGroup = null
 	let selectedCell = null
@@ -113,6 +114,22 @@ const setKeyMapping = (keyMapping) => {
 	for (let [code, value] of Object.entries(keyMapping)) {
 		document.querySelector(`.helper-${code}`).textContent = value
 	}
+}
+
+const startTimer = () => {
+	const t0 = performance.now()
+	const timerEl = document.querySelector('.timer')
+
+	const divmod = (x, y) => [Math.floor(x / y), x % y]
+
+	const updateTimer = () => {
+		const t = Math.round((performance.now() - t0) / 1000)
+		const [mm, ss] = divmod(t, 60)
+		timerEl.textContent = `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`
+		requestAnimationFrame(updateTimer)
+	}
+
+	requestAnimationFrame(updateTimer)
 }
 
 const showGroupHelper = () => {
