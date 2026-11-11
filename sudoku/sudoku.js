@@ -1,5 +1,5 @@
 import { backtracking, countSolutions } from './backtracking.js'
-import { nav, shuffle } from './utils.js'
+import { nav, shuffle, divmod } from './utils.js'
 
 Object.prototype.andThen = function (callback) {
 	return callback(this)
@@ -77,8 +77,15 @@ const gameLoop = async (keyCodes, board) => {
 		})
 
 		// State update
-		if (!keyCodes[event.code]) return
-		const [x, y] = keyCodes[event.code]
+		let [x, y] = [null, null]
+
+		if ('0123456789'.includes(event.key) && selectedCell)
+			[x, y] = divmod(parseInt(event.key) - 1, 3)
+
+		if (keyCodes[event.code]) [x, y] = keyCodes[event.code]
+
+		if (x === null || y === null) return
+
 		if (!selectedGroup) {
 			selectedGroup = [x, y]
 		} else if (!selectedCell) {
@@ -120,8 +127,6 @@ const setKeyMapping = (keyMapping) => {
 const startTimer = () => {
 	const t0 = performance.now()
 	const timerEl = document.querySelector('.timer')
-
-	const divmod = (x, y) => [Math.floor(x / y), x % y]
 
 	const updateTimer = () => {
 		const t = Math.round((performance.now() - t0) / 1000)
