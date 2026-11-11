@@ -44,6 +44,7 @@ const generateBoard = (size = 9) => {
 
 const generateTable = (size) => {
 	const table = document.createElement('table')
+	table.classList.add('sudoku')
 	for (let i = 0; i < size; i++) {
 		const row = document.createElement('tr')
 		for (let j = 0; j < size; j++) {
@@ -135,12 +136,26 @@ const startTimer = () => {
 const showGroupHelper = () => {
 	document.querySelector('.local-helper').classList.add('hidden')
 	const helper = document.querySelector('.helper')
+	helper
+		.querySelectorAll('td.hidden')
+		.forEach((el) => el.classList.remove('hidden'))
 	helper.classList = 'helper global'
 }
 
 const showCellHelper = ([row, col]) => {
 	document.querySelector('.local-helper').classList.add('hidden')
 	const helper = document.querySelector('.helper')
+	const game = document.querySelector('.sudoku')
+	for (let y of [0, 1, 2]) {
+		for (let x of [0, 1, 2]) {
+			if (
+				game.rows[row * 3 + y].cells[col * 3 + x].classList.contains(
+					'prefilled',
+				)
+			)
+				helper.rows[y].cells[x].classList.add('hidden')
+		}
+	}
 
 	helper.classList = `helper group col-${col} row-${row}`
 }
