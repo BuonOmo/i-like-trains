@@ -77,6 +77,12 @@ const gameLoop = async (keyCodes, board) => {
 		})
 
 		// State update
+		if (event.key == 'Escape' || event.key === 'Backspace') {
+			if (selectedCell) selectedCell = null
+			else selectedGroup = null
+			printHelper(selectedGroup, selectedCell, keyMapping)
+			return
+		}
 		let [x, y] = [null, null]
 
 		if ('0123456789'.includes(event.key))
@@ -107,14 +113,7 @@ const gameLoop = async (keyCodes, board) => {
 			selectedGroup = null
 		}
 
-		// Print helper
-		if (!selectedGroup) {
-			showGroupHelper()
-		} else if (!selectedCell) {
-			showCellHelper(selectedGroup)
-		} else {
-			showValueHelper(selectedCell, keyMapping)
-		}
+		printHelper(selectedGroup, selectedCell, keyMapping)
 	}
 }
 
@@ -136,6 +135,16 @@ const startTimer = () => {
 	}
 
 	requestAnimationFrame(updateTimer)
+}
+
+const printHelper = (selectedGroup, selectedCell, keyMapping) => {
+	if (!selectedGroup) {
+		showGroupHelper()
+	} else if (!selectedCell) {
+		showCellHelper(selectedGroup)
+	} else {
+		showValueHelper(selectedCell, keyMapping)
+	}
 }
 
 const showGroupHelper = () => {
