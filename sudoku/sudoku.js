@@ -79,7 +79,7 @@ const gameLoop = async (keyCodes, board) => {
 		// State update
 		let [x, y] = [null, null]
 
-		if ('0123456789'.includes(event.key) && selectedCell)
+		if ('0123456789'.includes(event.key))
 			[x, y] = divmod(parseInt(event.key) - 1, 3)
 
 		if (keyCodes[event.code]) [x, y] = keyCodes[event.code]
