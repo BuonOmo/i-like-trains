@@ -172,14 +172,14 @@ const showValueHelper = ([row, col], keyMapping) => {
 	helper.style.top = `calc(${row} * (100% / 9)`
 	helper.style.left = `calc(${col} * (100% / 9)`
 	let i = 0
-	helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${i % 9}`
+	helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${(i % 9) + 1}`
 
 	helper.classList.remove('hidden')
 
 	if (valueHelperInterval) clearInterval(valueHelperInterval)
 	valueHelperInterval = setInterval(() => {
 		i += 1
-		helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${i % 9}`
+		helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${(i % 9) + 1}`
 	}, 1000)
 }
 
