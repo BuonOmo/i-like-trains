@@ -92,7 +92,7 @@ const gameLoop = async (keyCodes, board) => {
 				selectedCell = [pX, pY]
 		} else {
 			const [pX, pY] = selectedCell
-			const value = x + 3 * y + 1
+			const value = y + 3 * x + 1
 			board[pX][pY] = value
 			document.getElementById(`cell-${pX}-${pY}`).textContent = value
 			selectedCell = null
