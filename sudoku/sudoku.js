@@ -64,6 +64,7 @@ const gameLoop = async (keyCodes, board) => {
 		.andThen(Object.fromEntries)
 
 	setKeyMapping(keyMapping)
+	printHelper(null, null, keyMapping)
 	startTimer()
 
 	let selectedGroup = null
@@ -150,9 +151,25 @@ const printHelper = (selectedGroup, selectedCell, keyMapping) => {
 const showGroupHelper = () => {
 	document.querySelector('.local-helper').classList.add('hidden')
 	const helper = document.querySelector('.helper')
+	const game = document.querySelector('.sudoku')
 	helper
 		.querySelectorAll('td.hidden')
 		.forEach((el) => el.classList.remove('hidden'))
+	for (let y of [0, 1, 2])
+		for (let x of [0, 1, 2])
+			if (
+				game.rows[3 * y].cells[3 * x].classList.contains('prefilled') &&
+				game.rows[3 * y + 1].cells[3 * x].classList.contains('prefilled') &&
+				game.rows[3 * y + 2].cells[3 * x].classList.contains('prefilled') &&
+				game.rows[3 * y].cells[3 * x + 1].classList.contains('prefilled') &&
+				game.rows[3 * y + 1].cells[3 * x + 1].classList.contains('prefilled') &&
+				game.rows[3 * y + 2].cells[3 * x + 1].classList.contains('prefilled') &&
+				game.rows[3 * y].cells[3 * x + 2].classList.contains('prefilled') &&
+				game.rows[3 * y + 1].cells[3 * x + 2].classList.contains('prefilled') &&
+				game.rows[3 * y + 2].cells[3 * x + 2].classList.contains('prefilled')
+			)
+				helper.rows[y].cells[x].classList.add('hidden')
+
 	helper.classList = 'helper global'
 }
 
@@ -160,16 +177,17 @@ const showCellHelper = ([row, col]) => {
 	document.querySelector('.local-helper').classList.add('hidden')
 	const helper = document.querySelector('.helper')
 	const game = document.querySelector('.sudoku')
-	for (let y of [0, 1, 2]) {
-		for (let x of [0, 1, 2]) {
+	helper
+		.querySelectorAll('td.hidden')
+		.forEach((el) => el.classList.remove('hidden'))
+	for (let y of [0, 1, 2])
+		for (let x of [0, 1, 2])
 			if (
 				game.rows[row * 3 + y].cells[col * 3 + x].classList.contains(
 					'prefilled',
 				)
 			)
 				helper.rows[y].cells[x].classList.add('hidden')
-		}
-	}
 
 	helper.classList = `helper group col-${col} row-${row}`
 }
