@@ -1,10 +1,26 @@
-export const shuffle = (ary) => ary.sort(() => Math.random() - 0.5)
-// for (let i = 0; i < ary.length; i++) {
-// 	let swap = ary[i]
-// 	let rand = Math.floor(Math.random() * ary.length)
-// 	ary[i] = ary[rand]
-// 	ary[rand] = swap
-//  }
+// Percentage of cells to remove from the board.
+export const DIFFICULTY =
+	parseFloat(new URLSearchParams(window.location.search).get('d')) || 0.25
+
+// Random seed can be set.
+let seed =
+	parseInt(new URLSearchParams(window.location.search).get('s')) ||
+	Math.floor(Math.random() * 0xffffffff)
+
+console.debug(
+	`Using seed: ${seed}, difficulty: ${DIFFICULTY}\n` +
+		` Generated URL:\n` +
+		`${window.location.href}${window.location.href.includes('?') ? '&' : '?'}s=${seed}&d=${DIFFICULTY}`,
+)
+
+export const rand = () => {
+	let t = (seed += 0x6d2b79f5)
+	t = Math.imul(t ^ (t >>> 15), t | 1)
+	t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+	return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+}
+
+export const shuffle = (ary) => ary.sort(() => rand() - 0.5)
 
 export function* nav(board) {
 	for (let i = 0; i < board.length; i++) {
