@@ -99,4 +99,4 @@ const countSolutions = (board, count = 0) => {
 	return count
 }
 
-export { countSolutions, backtracking }
+export { countSolutions, backtracking, isValid }

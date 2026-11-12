@@ -1,4 +1,4 @@
-import { backtracking, countSolutions } from './backtracking.js'
+import { backtracking, countSolutions, isValid } from './backtracking.js'
 import { nav, shuffle, divmod } from './utils.js'
 
 Object.prototype.andThen = function (callback) {
@@ -68,6 +68,9 @@ const createState = (board, keyCodes, keyMapping) => {
 		),
 	)
 
+	let filledCount = 0
+	for (const [x, y] of nav(board)) if (board[x][y] !== 0) filledCount++
+
 	return {
 		board,
 		prefilled,
@@ -75,11 +78,15 @@ const createState = (board, keyCodes, keyMapping) => {
 		keyMapping,
 		selectedGroup: null,
 		selectedCell: null,
+		filledCount,
+		finished: false,
 	}
 }
 
 const update = (state, event) => {
 	const patches = []
+
+	if (state.finished) return patches
 
 	if (event.key === 'Escape' || event.key === 'Backspace') {
 		if (state.selectedCell) state.selectedCell = null
@@ -107,11 +114,20 @@ const update = (state, event) => {
 	} else {
 		const [pX, pY] = state.selectedCell
 		const value = y + 3 * x + 1
+		if (state.board[pX][pY] === 0) state.filledCount++
 		state.board[pX][pY] = value
 		state.selectedCell = null
 		state.selectedGroup = null
 		patches.push({ type: 'cell', x: pX, y: pY, value })
 		patches.push({ type: 'selection' })
+
+		if (
+			state.filledCount === state.board.length ** 2 &&
+			isValid(state.board)
+		) {
+			state.finished = true
+			patches.push({ type: 'win' })
+		}
 	}
 
 	return patches
@@ -126,6 +142,9 @@ const render = (state, patches) => {
 				break
 			case 'selection':
 				renderHelpers(state)
+				break
+			case 'win':
+				renderWin()
 				break
 		}
 	}
@@ -175,6 +194,8 @@ const setKeyMapping = (keyMapping) => {
 	}
 }
 
+let timerRafId = null
+
 const startTimer = () => {
 	const t0 = performance.now()
 	const timerEl = document.querySelector('.timer')
@@ -183,10 +204,23 @@ const startTimer = () => {
 		const t = Math.round((performance.now() - t0) / 1000)
 		const [mm, ss] = divmod(t, 60)
 		timerEl.textContent = `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`
-		requestAnimationFrame(updateTimer)
+		timerRafId = requestAnimationFrame(updateTimer)
 	}
 
-	requestAnimationFrame(updateTimer)
+	timerRafId = requestAnimationFrame(updateTimer)
+}
+
+const stopTimer = () => {
+	if (timerRafId !== null) cancelAnimationFrame(timerRafId)
+	timerRafId = null
+}
+
+const renderWin = () => {
+	stopTimer()
+	const timerEl = document.querySelector('.timer')
+	const resultEl = document.querySelector('.result')
+	resultEl.textContent = `Solved in ${timerEl.textContent}!`
+	resultEl.classList.remove('hidden')
 }
 
 const showGroupHelper = (prefilled) => {
