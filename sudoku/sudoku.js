@@ -2,7 +2,7 @@ import { backtracking, countSolutions, isValid } from './backtracking.js'
 import { nav, shuffle, divmod } from './utils.js'
 
 // Percentage of cells to remove from the board
-const DIFFICULTY = 0.25
+const DIFFICULTY = localStorage.getItem('sudokuDifficulty') || 0.25
 
 Object.prototype.andThen = function (callback) {
 	return callback(this)
