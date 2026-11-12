@@ -10,7 +10,7 @@ let seed =
 console.debug(
 	`Using seed: ${seed}, difficulty: ${DIFFICULTY}\n` +
 		` Generated URL:\n` +
-		`${window.location.href}${window.location.href.includes('?') ? '&' : '?'}s=${seed}&d=${DIFFICULTY}`,
+		`${window.location.href.split('?')[0]}?s=${seed}&d=${DIFFICULTY}`,
 )
 
 export const rand = () => {
