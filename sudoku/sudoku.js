@@ -57,6 +57,84 @@ const generateTable = (size) => {
 	document.getElementById('wrapper').appendChild(table)
 }
 
+// Builds the initial, immutable game state from the keyboard layout and the
+// already-rendered board. `prefilled` is captured once here (rather than
+// re-derived from the DOM on every keystroke) so that state updates stay pure.
+const createState = (board, keyCodes, keyMapping) => {
+	const size = board.length
+	const prefilled = Array.from({ length: size }, (_, x) =>
+		Array.from({ length: size }, (_, y) =>
+			document.getElementById(`cell-${x}-${y}`).classList.contains('prefilled'),
+		),
+	)
+
+	return {
+		board,
+		prefilled,
+		keyCodes,
+		keyMapping,
+		selectedGroup: null,
+		selectedCell: null,
+	}
+}
+
+const update = (state, event) => {
+	if (event.key === 'Escape' || event.key === 'Backspace') {
+		if (state.selectedCell) state.selectedCell = null
+		else state.selectedGroup = null
+		return true
+	}
+
+	let [x, y] = [null, null]
+	if ('0123456789'.includes(event.key))
+		[x, y] = divmod(parseInt(event.key) - 1, 3)
+	if (state.keyCodes[event.code]) [x, y] = state.keyCodes[event.code]
+	if (x === null || y === null) return false
+
+	if (!state.selectedGroup) {
+		state.selectedGroup = [x, y]
+	} else if (!state.selectedCell) {
+		const [gX, gY] = state.selectedGroup
+		const [pX, pY] = [gX * 3 + x, gY * 3 + y]
+		if (!state.prefilled[pX][pY]) state.selectedCell = [pX, pY]
+	} else {
+		const [pX, pY] = state.selectedCell
+		state.board[pX][pY] = y + 3 * x + 1
+		state.selectedCell = null
+		state.selectedGroup = null
+	}
+
+	return true
+}
+
+const render = (state) => {
+	renderBoard(state)
+	renderHelpers(state)
+}
+
+const renderBoard = ({ board, prefilled }) => {
+	for (const [x, y] of nav(board)) {
+		if (prefilled[x][y]) continue
+		document.getElementById(`cell-${x}-${y}`).textContent = board[x][y] || ''
+	}
+}
+
+const renderHelpers = ({
+	selectedGroup,
+	selectedCell,
+	keyMapping,
+	prefilled,
+}) => {
+	if (!selectedCell && valueHelperInterval) {
+		clearInterval(valueHelperInterval)
+		valueHelperInterval = null
+	}
+
+	if (!selectedGroup) showGroupHelper(prefilled)
+	else if (!selectedCell) showCellHelper(selectedGroup, prefilled)
+	else showValueHelper(selectedCell, keyMapping)
+}
+
 const gameLoop = async (keyCodes, board) => {
 	const layoutMap = await navigator.keyboard.getLayoutMap()
 	const keyMapping = Object.keys(keyCodes)
@@ -64,57 +142,15 @@ const gameLoop = async (keyCodes, board) => {
 		.andThen(Object.fromEntries)
 
 	setKeyMapping(keyMapping)
-	printHelper(null, null, keyMapping)
+
+	const state = createState(board, keyCodes, keyMapping)
+
+	render(state)
 	startTimer()
 
-	let selectedGroup = null
-	let selectedCell = null
 	return function listener(event) {
-		console.log({
-			selectedGroup,
-			selectedCell,
-			event,
-			board,
-		})
-
-		// State update
-		if (event.key == 'Escape' || event.key === 'Backspace') {
-			if (selectedCell) selectedCell = null
-			else selectedGroup = null
-			printHelper(selectedGroup, selectedCell, keyMapping)
-			return
-		}
-		let [x, y] = [null, null]
-
-		if ('0123456789'.includes(event.key))
-			[x, y] = divmod(parseInt(event.key) - 1, 3)
-
-		if (keyCodes[event.code]) [x, y] = keyCodes[event.code]
-
-		if (x === null || y === null) return
-
-		if (!selectedGroup) {
-			selectedGroup = [x, y]
-		} else if (!selectedCell) {
-			const [gX, gY] = selectedGroup
-			const pX = gX * 3 + x
-			const pY = gY * 3 + y
-			if (
-				!document
-					.getElementById(`cell-${pX}-${pY}`)
-					.classList.contains('prefilled')
-			)
-				selectedCell = [pX, pY]
-		} else {
-			const [pX, pY] = selectedCell
-			const value = y + 3 * x + 1
-			board[pX][pY] = value
-			document.getElementById(`cell-${pX}-${pY}`).textContent = value
-			selectedCell = null
-			selectedGroup = null
-		}
-
-		printHelper(selectedGroup, selectedCell, keyMapping)
+		if (!update(state, event)) return
+		render(state)
 	}
 }
 
@@ -138,55 +174,33 @@ const startTimer = () => {
 	requestAnimationFrame(updateTimer)
 }
 
-const printHelper = (selectedGroup, selectedCell, keyMapping) => {
-	if (!selectedGroup) {
-		showGroupHelper()
-	} else if (!selectedCell) {
-		showCellHelper(selectedGroup)
-	} else {
-		showValueHelper(selectedCell, keyMapping)
-	}
-}
-
-const showGroupHelper = () => {
+const showGroupHelper = (prefilled) => {
 	document.querySelector('.local-helper').classList.add('hidden')
 	const helper = document.querySelector('.helper')
-	const game = document.querySelector('.sudoku')
 	helper
 		.querySelectorAll('td.hidden')
 		.forEach((el) => el.classList.remove('hidden'))
 	for (let y of [0, 1, 2])
-		for (let x of [0, 1, 2])
-			if (
-				game.rows[3 * y].cells[3 * x].classList.contains('prefilled') &&
-				game.rows[3 * y + 1].cells[3 * x].classList.contains('prefilled') &&
-				game.rows[3 * y + 2].cells[3 * x].classList.contains('prefilled') &&
-				game.rows[3 * y].cells[3 * x + 1].classList.contains('prefilled') &&
-				game.rows[3 * y + 1].cells[3 * x + 1].classList.contains('prefilled') &&
-				game.rows[3 * y + 2].cells[3 * x + 1].classList.contains('prefilled') &&
-				game.rows[3 * y].cells[3 * x + 2].classList.contains('prefilled') &&
-				game.rows[3 * y + 1].cells[3 * x + 2].classList.contains('prefilled') &&
-				game.rows[3 * y + 2].cells[3 * x + 2].classList.contains('prefilled')
-			)
-				helper.rows[y].cells[x].classList.add('hidden')
+		for (let x of [0, 1, 2]) {
+			let allPrefilled = true
+			for (let dy of [0, 1, 2])
+				for (let dx of [0, 1, 2])
+					if (!prefilled[3 * y + dy][3 * x + dx]) allPrefilled = false
+			if (allPrefilled) helper.rows[y].cells[x].classList.add('hidden')
+		}
 
 	helper.classList = 'helper global'
 }
 
-const showCellHelper = ([row, col]) => {
+const showCellHelper = ([row, col], prefilled) => {
 	document.querySelector('.local-helper').classList.add('hidden')
 	const helper = document.querySelector('.helper')
-	const game = document.querySelector('.sudoku')
 	helper
 		.querySelectorAll('td.hidden')
 		.forEach((el) => el.classList.remove('hidden'))
 	for (let y of [0, 1, 2])
 		for (let x of [0, 1, 2])
-			if (
-				game.rows[row * 3 + y].cells[col * 3 + x].classList.contains(
-					'prefilled',
-				)
-			)
+			if (prefilled[row * 3 + y][col * 3 + x])
 				helper.rows[y].cells[x].classList.add('hidden')
 
 	helper.classList = `helper group col-${col} row-${row}`
