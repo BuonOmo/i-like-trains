@@ -59,9 +59,6 @@ const generateTable = (size) => {
 	document.getElementById('wrapper').appendChild(table)
 }
 
-// Builds the initial, immutable game state from the keyboard layout and the
-// already-rendered board. `prefilled` is captured once here (rather than
-// re-derived from the DOM on every keystroke) so that state updates stay pure.
 const createState = (board, keyCodes, keyMapping) => {
 	const size = board.length
 	const prefilled = Array.from({ length: size }, (_, x) =>
@@ -105,19 +102,19 @@ const update = (state, event) => {
 
 	if (!state.selectedGroup) {
 		state.selectedGroup = [x, y]
-		// Shortcut: if there's only one empty cell in the group,
-		// select it immediately.
+		// Shortcut: if there's only one cell not prefilled
+		// in the group, select it immediately.
 		let emptyCell
 		out: for (let dx = 0; dx < 3; dx++) {
 			for (let dy = 0; dy < 3; dy++) {
 				const [pX, pY] = [x * 3 + dx, y * 3 + dy]
-				if (state.board[pX][pY] === 0)
-					if (emptyCell) {
-						emptyCell = null
-						break out
-					} else {
-						emptyCell = [pX, pY]
-					}
+				if (state.prefilled[pX][pY]) continue
+				if (emptyCell) {
+					emptyCell = null
+					break out
+				} else {
+					emptyCell = [pX, pY]
+				}
 			}
 		}
 		if (emptyCell) {
