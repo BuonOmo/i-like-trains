@@ -5,18 +5,20 @@ Object.prototype.andThen = function (callback) {
 	return callback(this)
 }
 
-const removeRandomElements = (board, num) => {
-	let nonEmptyCells = []
-	for (const [x, y] of nav(board)) {
-		if (board[x][y] > 0) {
-			nonEmptyCells.push([x, y])
-		}
-	}
-	nonEmptyCells = shuffle(nonEmptyCells)
-	for (let i = 0; i < Math.min(nonEmptyCells.length, num); i++) {
-		let [x, y] = nonEmptyCells[i]
+const digHoles = (board, count) => {
+	// NOTE: we usually use this function from a filled board,
+	// hence we assume there is no 0 valued cell.
+	const cells = shuffle(Array.from(nav(board)))
+	if (count > cells.length)
+		throw new Error('Cannot remove more cells than available')
+	for (const [x, y] of cells) {
+		if (count <= 0) break
+		const backup = board[x][y]
 		board[x][y] = 0
+		if (countSolutions(board, 2) > 1) board[x][y] = backup
+		else count--
 	}
+	if (count > 0) throw new Error('Could not remove enough cells')
 }
 
 const startGame = (size = 9) => {
@@ -38,11 +40,7 @@ const generateBoard = (size = 9) => {
 	console.debug(
 		`Removing ${count} random elements from the board for difficulty`,
 	)
-	removeRandomElements(board, count)
-	while (countSolutions(board) > 1) {
-		backtracking(board)
-		removeRandomElements(board, count)
-	}
+	digHoles(board, count)
 	return board
 }
 

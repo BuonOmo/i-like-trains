@@ -85,15 +85,17 @@ const backtracking = function (board) {
 	return false
 }
 
-const countSolutions = (board, count = 0) => {
+const countSolutions = (board, limit = Infinity) => {
 	if (!isValid(board)) return 0
 	if (isFilled(board)) return 1
 
 	const [x, y] = findEmptyCell(board)
+	let count = 0
 	for (const number of validNumbers(board, x, y)) {
 		board[x][y] = number
-		count += countSolutions(board, count)
+		count += countSolutions(board, limit - count)
 		board[x][y] = 0
+		if (count >= limit) break
 	}
 
 	return count
