@@ -81,7 +81,7 @@
 					width: calc(100% / 3);
 					height: calc(100% / 3);
 					td {
-						font-size: 4em;
+						font-size: min(4em, 100% * 3);
 					}
 				}
 				&.col-0 {
@@ -114,11 +114,13 @@
 					);
 				}
 			}
-			&:not(.helper) {
+			&.sudoku {
 				width: 100%;
 				height: 100%;
 
 				tr {
+					/* Make sure we have a default height if nothing in the given line. */
+					height: calc(100% / 9);
 					&:last-child {
 						border-bottom: 2px solid var(--border);
 					}
