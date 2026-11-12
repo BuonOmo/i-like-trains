@@ -82,6 +82,9 @@ const createState = (board, keyCodes, keyMapping) => {
 	}
 }
 
+// Value is calculated as if we were using a digital keyboard.
+const valueForKeyIndex = (i) => (i % 3) + 3 * (2 - Math.floor(i / 3)) + 1
+
 const update = (state, event) => {
 	const patches = []
 
@@ -130,7 +133,7 @@ const update = (state, event) => {
 		}
 	} else {
 		const [pX, pY] = state.selectedCell
-		const value = y + 3 * x + 1
+		const value = valueForKeyIndex(x * 3 + y)
 		if (state.board[pX][pY] === 0) state.filledCount++
 		state.board[pX][pY] = value
 		state.selectedCell = null
@@ -277,14 +280,14 @@ const showValueHelper = ([row, col], keyMapping) => {
 	helper.style.top = `calc(${row} * (100% / 9)`
 	helper.style.left = `calc(${col} * (100% / 9)`
 	let i = 0
-	helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${(i % 9) + 1}`
+	helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${valueForKeyIndex(i % 9)}`
 
 	helper.classList.remove('hidden')
 
 	if (valueHelperInterval) clearInterval(valueHelperInterval)
 	valueHelperInterval = setInterval(() => {
 		i += 1
-		helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${(i % 9) + 1}`
+		helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${valueForKeyIndex(i % 9)}`
 	}, 1000)
 }
 
