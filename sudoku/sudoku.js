@@ -1,6 +1,9 @@
 import { backtracking, countSolutions, isValid } from './backtracking.js'
 import { nav, shuffle, divmod } from './utils.js'
 
+// Percentage of cells to remove from the board
+const DIFFICULTY = 0.25
+
 Object.prototype.andThen = function (callback) {
 	return callback(this)
 }
@@ -34,10 +37,14 @@ const startGame = (size = 9) => {
 const generateBoard = (size = 9) => {
 	const board = Array.from({ length: size }, () => Array(size).fill(0))
 	backtracking(board)
-	removeRandomElements(board, Math.floor((size * size) / 4))
+	const count = Math.floor(size * size * DIFFICULTY)
+	console.debug(
+		`Removing ${count} random elements from the board for difficulty`,
+	)
+	removeRandomElements(board, count)
 	while (countSolutions(board) > 1) {
 		backtracking(board)
-		removeRandomElements(board, Math.floor((size * size) / 4))
+		removeRandomElements(board, count)
 	}
 	return board
 }
@@ -121,10 +128,7 @@ const update = (state, event) => {
 		patches.push({ type: 'cell', x: pX, y: pY, value })
 		patches.push({ type: 'selection' })
 
-		if (
-			state.filledCount === state.board.length ** 2 &&
-			isValid(state.board)
-		) {
+		if (state.filledCount === state.board.length ** 2 && isValid(state.board)) {
 			state.finished = true
 			patches.push({ type: 'win' })
 		}
