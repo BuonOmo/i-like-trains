@@ -79,44 +79,60 @@ const createState = (board, keyCodes, keyMapping) => {
 }
 
 const update = (state, event) => {
+	const patches = []
+
 	if (event.key === 'Escape' || event.key === 'Backspace') {
 		if (state.selectedCell) state.selectedCell = null
 		else state.selectedGroup = null
-		return true
+		patches.push({ type: 'selection' })
+		return patches
 	}
 
 	let [x, y] = [null, null]
 	if ('0123456789'.includes(event.key))
 		[x, y] = divmod(parseInt(event.key) - 1, 3)
 	if (state.keyCodes[event.code]) [x, y] = state.keyCodes[event.code]
-	if (x === null || y === null) return false
+	if (x === null || y === null) return patches
 
 	if (!state.selectedGroup) {
 		state.selectedGroup = [x, y]
+		patches.push({ type: 'selection' })
 	} else if (!state.selectedCell) {
 		const [gX, gY] = state.selectedGroup
 		const [pX, pY] = [gX * 3 + x, gY * 3 + y]
-		if (!state.prefilled[pX][pY]) state.selectedCell = [pX, pY]
+		if (!state.prefilled[pX][pY]) {
+			state.selectedCell = [pX, pY]
+			patches.push({ type: 'selection' })
+		}
 	} else {
 		const [pX, pY] = state.selectedCell
-		state.board[pX][pY] = y + 3 * x + 1
+		const value = y + 3 * x + 1
+		state.board[pX][pY] = value
 		state.selectedCell = null
 		state.selectedGroup = null
+		patches.push({ type: 'cell', x: pX, y: pY, value })
+		patches.push({ type: 'selection' })
 	}
 
-	return true
+	return patches
 }
 
-const render = (state) => {
-	renderBoard(state)
-	renderHelpers(state)
-}
-
-const renderBoard = ({ board, prefilled }) => {
-	for (const [x, y] of nav(board)) {
-		if (prefilled[x][y]) continue
-		document.getElementById(`cell-${x}-${y}`).textContent = board[x][y] || ''
+// Graphics: applies a list of patches to the DOM. Never mutates state.
+const render = (state, patches) => {
+	for (const patch of patches) {
+		switch (patch.type) {
+			case 'cell':
+				renderCell(patch)
+				break
+			case 'selection':
+				renderHelpers(state)
+				break
+		}
 	}
+}
+
+const renderCell = ({ x, y, value }) => {
+	document.getElementById(`cell-${x}-${y}`).textContent = value || ''
 }
 
 const renderHelpers = ({
@@ -145,12 +161,11 @@ const gameLoop = async (keyCodes, board) => {
 
 	const state = createState(board, keyCodes, keyMapping)
 
-	render(state)
+	render(state, [{ type: 'selection' }])
 	startTimer()
 
 	return function listener(event) {
-		if (!update(state, event)) return
-		render(state)
+		render(state, update(state, event))
 	}
 }
 
