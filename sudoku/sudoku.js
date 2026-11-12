@@ -107,6 +107,24 @@ const update = (state, event) => {
 
 	if (!state.selectedGroup) {
 		state.selectedGroup = [x, y]
+		// Shortcut: if there's only one empty cell in the group,
+		// select it immediately.
+		let emptyCell
+		out: for (let dx = 0; dx < 3; dx++) {
+			for (let dy = 0; dy < 3; dy++) {
+				const [pX, pY] = [x * 3 + dx, y * 3 + dy]
+				if (state.board[pX][pY] === 0)
+					if (emptyCell) {
+						emptyCell = null
+						break out
+					} else {
+						emptyCell = [pX, pY]
+					}
+			}
+		}
+		if (emptyCell) {
+			state.selectedCell = emptyCell
+		}
 		patches.push({ type: 'selection' })
 	} else if (!state.selectedCell) {
 		const [gX, gY] = state.selectedGroup
