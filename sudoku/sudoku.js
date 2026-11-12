@@ -221,6 +221,7 @@ const stopTimer = () => {
 
 const renderWin = () => {
 	stopTimer()
+	hideHelpers()
 	const timerEl = document.querySelector('.timer')
 	const resultEl = document.querySelector('.result')
 	resultEl.textContent = `Solved in ${timerEl.textContent}!`
@@ -275,6 +276,13 @@ const showValueHelper = ([row, col], keyMapping) => {
 		i += 1
 		helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${(i % 9) + 1}`
 	}, 1000)
+}
+
+const hideHelpers = () => {
+	document.querySelector('.helper').classList.add('hidden')
+	document.querySelector('.local-helper').classList.add('hidden')
+	if (valueHelperInterval) clearInterval(valueHelperInterval)
+	valueHelperInterval = null
 }
 
 export { startGame, gameLoop }
