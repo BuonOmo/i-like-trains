@@ -35,7 +35,6 @@ const isValid = (board) => {
 
 const startGame = async (size = 9) => {
 	const board = await generateBoard(size)
-	generateTable(size)
 	for (const [x, y] of nav(board)) {
 		if (board[x][y] === 0) continue
 
@@ -56,21 +55,6 @@ const generateBoard = async (size = 9) => {
 	)
 	algo._free(ptr)
 	return board
-}
-
-const generateTable = (size) => {
-	const table = document.createElement('table')
-	table.classList.add('sudoku')
-	for (let i = 0; i < size; i++) {
-		const row = document.createElement('tr')
-		for (let j = 0; j < size; j++) {
-			const cell = document.createElement('td')
-			cell.setAttribute('id', `cell-${i}-${j}`)
-			row.appendChild(cell)
-		}
-		table.appendChild(row)
-	}
-	document.getElementById('wrapper').appendChild(table)
 }
 
 const createState = (board, keyCodes, keyMapping) => {
