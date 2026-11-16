@@ -82,9 +82,6 @@ const createState = (board, keyCodes, keyMapping) => {
 	}
 }
 
-// Value is calculated as if we were using a digital keyboard.
-const valueForKeyIndex = (i) => (i % 3) + 3 * (2 - Math.floor(i / 3)) + 1
-
 const update = (state, event) => {
 	const patches = []
 
@@ -97,10 +94,17 @@ const update = (state, event) => {
 		return patches
 	}
 
+	let value = null
 	let [x, y] = [null, null]
-	if ('0123456789'.includes(event.key))
-		[x, y] = divmod(parseInt(event.key) - 1, 3)
-	if (state.keyCodes[event.code]) [x, y] = state.keyCodes[event.code]
+	if ('123456789'.includes(event.key)) {
+		value = parseInt(event.key)
+		;[x, y] = divmod(value - 1, 3)
+	}
+	if (state.keyCodes[event.code]) {
+		;[x, y] = state.keyCodes[event.code]
+		// Value is computed as if we had a digital keyboard
+		value = 1 + y + 3 * (2 - x)
+	}
 	if (x === null || y === null) return patches
 
 	if (!state.selectedGroup) {
@@ -133,7 +137,6 @@ const update = (state, event) => {
 		}
 	} else {
 		const [pX, pY] = state.selectedCell
-		const value = valueForKeyIndex(x * 3 + y)
 		if (state.board[pX][pY] === 0) state.filledCount++
 		state.board[pX][pY] = value
 		state.selectedCell = null
@@ -280,15 +283,14 @@ const showValueHelper = ([row, col], keyMapping) => {
 	helper.style.top = `calc(${row} * (100% / 9)`
 	helper.style.left = `calc(${col} * (100% / 9)`
 	let i = 0
-	helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${valueForKeyIndex(i % 9)}`
+	const render = () =>
+		(helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${(i++ % 9) + 1}`)
 
+	render()
 	helper.classList.remove('hidden')
 
 	if (valueHelperInterval) clearInterval(valueHelperInterval)
-	valueHelperInterval = setInterval(() => {
-		i += 1
-		helper.textContent = `${Object.values(keyMapping)[i % 9]} = ${valueForKeyIndex(i % 9)}`
-	}, 1000)
+	valueHelperInterval = setInterval(render, 1000)
 }
 
 const hideHelpers = () => {

@@ -160,16 +160,18 @@
 
 		// The left-hand centered 3x3 square of keys on a keyboard, whatever the layout,
 		// mapped to sudoku board cells.
+		// Order of keys matter here, as it is used to understand which key represents
+		// which digit, see line comments
 		const keyCodes = {
-			KeyW: [0, 0],
-			KeyE: [0, 1],
-			KeyR: [0, 2],
-			KeyS: [1, 0],
-			KeyD: [1, 1],
-			KeyF: [1, 2],
-			KeyX: [2, 0],
-			KeyC: [2, 1],
-			KeyV: [2, 2],
+			KeyX: [2, 0], // 1
+			KeyC: [2, 1], // 2
+			KeyV: [2, 2], // 3
+			KeyS: [1, 0], // 4
+			KeyD: [1, 1], // 5
+			KeyF: [1, 2], // 6
+			KeyW: [0, 0], // 7
+			KeyE: [0, 1], // 8
+			KeyR: [0, 2], // 9
 		}
 
 		const style = document.head.querySelector('style')
