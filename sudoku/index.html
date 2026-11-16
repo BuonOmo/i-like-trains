@@ -82,6 +82,11 @@
 					height: calc(100% / 3);
 					td {
 						font-size: min(4em, 100% * 3);
+						background: color-mix(
+							in srgb,
+							var(--accent),
+							transparent 80%
+						);
 					}
 				}
 				&.col-0 {
@@ -107,11 +112,6 @@
 					border: 2px solid var(--accent);
 					font-weight: bolder;
 					color: color-mix(in srgb, var(--accent), transparent);
-					background: color-mix(
-						in srgb,
-						var(--accent),
-						transparent 80%
-					);
 				}
 			}
 			&.sudoku {
