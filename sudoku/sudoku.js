@@ -82,15 +82,17 @@ const createState = (board, keyCodes, keyMapping) => {
 	}
 }
 
-const update = (state, event) => {
+const update = (history, event) => {
+	const state = structuredClone(history.at(-1))
 	const patches = []
 
 	if (state.finished) return patches
 
 	if (event.key === 'Escape' || event.key === 'Backspace') {
-		if (state.selectedCell) state.selectedCell = null
-		else state.selectedGroup = null
-		patches.push({ type: 'selection' })
+		if (history.length > 1) {
+			history.pop()
+			patches.push({ type: 'rewind' })
+		}
 		return patches
 	}
 
@@ -150,6 +152,7 @@ const update = (state, event) => {
 		}
 	}
 
+	history.push(state)
 	return patches
 }
 
@@ -157,6 +160,10 @@ const update = (state, event) => {
 const render = (state, patches) => {
 	for (const patch of patches) {
 		switch (patch.type) {
+			case 'rewind':
+				renderBoard(state)
+				renderHelpers(state)
+				break
 			case 'cell':
 				renderCell(patch)
 				break
@@ -167,6 +174,13 @@ const render = (state, patches) => {
 				renderWin()
 				break
 		}
+	}
+}
+
+const renderBoard = (state) => {
+	const boardEl = document.querySelector('.sudoku')
+	for (const [x, y] of nav(state.board)) {
+		boardEl.rows[x].cells[y].textContent = state.board[x][y] || ''
 	}
 }
 
@@ -203,8 +217,11 @@ const gameLoop = async (keyCodes, board) => {
 	render(state, [{ type: 'selection' }])
 	startTimer()
 
+	const history = [state]
+
 	return function listener(event) {
-		render(state, update(state, event))
+		const patches = update(history, event)
+		render(history.at(-1), patches)
 	}
 }
 
