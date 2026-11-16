@@ -154,7 +154,6 @@
 		}
 	</style>
 
-	<script src="backtracking.js" defer type="module"></script>
 	<script defer type="module">
 		import { startGame, gameLoop } from './sudoku.js'
 
@@ -177,7 +176,7 @@
 		const style = document.head.querySelector('style')
 		const n = 3
 		style.textContent = style.textContent.replaceAll('XXX', n)
-		const board = startGame(n * n)
+		const board = await startGame(n * n)
 		console.log(board)
 
 		document.addEventListener('keydown', await gameLoop(keyCodes, board))

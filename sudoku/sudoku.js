@@ -1,28 +1,40 @@
-import { backtracking, countSolutions, isValid } from './backtracking.js'
-import { nav, shuffle, divmod, DIFFICULTY } from './utils.js'
+import { nav, divmod, DIFFICULTY, SEED } from './utils.js'
+import createAlgoModule from './algo.js'
 
 Object.prototype.andThen = function (callback) {
 	return callback(this)
 }
 
-const digHoles = (board, count) => {
-	// NOTE: we usually use this function from a filled board,
-	// hence we assume there is no 0 valued cell.
-	const cells = shuffle(Array.from(nav(board)))
-	if (count > cells.length)
-		throw new Error('Cannot remove more cells than available')
-	for (const [x, y] of cells) {
-		if (count <= 0) break
-		const backup = board[x][y]
-		board[x][y] = 0
-		if (countSolutions(board, 2) > 1) board[x][y] = backup
-		else count--
+let algoModulePromise = null
+let algoModule = null
+const getAlgoModule = () => {
+	if (!algoModulePromise) {
+		algoModulePromise = createAlgoModule().then((module) => {
+			algoModule = module
+			return module
+		})
 	}
-	if (count > 0) throw new Error('Could not remove enough cells')
+	return algoModulePromise
 }
 
-const startGame = (size = 9) => {
-	const board = generateBoard(size)
+const boardToWasm = (board) => {
+	const size = board.length
+	const ptr = algoModule._malloc(size * size * 4)
+	for (const [x, y] of nav(board)) {
+		algoModule.setValue(ptr + (x * size + y) * 4, board[x][y], 'i32')
+	}
+	return ptr
+}
+
+const isValid = (board) => {
+	const ptr = boardToWasm(board)
+	const valid = algoModule._is_valid(ptr)
+	algoModule._free(ptr)
+	return Boolean(valid)
+}
+
+const startGame = async (size = 9) => {
+	const board = await generateBoard(size)
 	generateTable(size)
 	for (const [x, y] of nav(board)) {
 		if (board[x][y] === 0) continue
@@ -33,14 +45,16 @@ const startGame = (size = 9) => {
 	}
 	return board
 }
-const generateBoard = (size = 9) => {
-	const board = Array.from({ length: size }, () => Array(size).fill(0))
-	backtracking(board)
-	const count = Math.floor(size * size * DIFFICULTY)
-	console.debug(
-		`Removing ${count} random elements from the board for difficulty`,
+
+const generateBoard = async (size = 9) => {
+	const algo = await getAlgoModule()
+	const ptr = algo._generate_board(DIFFICULTY, SEED)
+	const board = Array.from({ length: size }, (_, x) =>
+		Array.from({ length: size }, (_, y) =>
+			algo.getValue(ptr + (x * size + y) * 4, 'i32'),
+		),
 	)
-	digHoles(board, count)
+	algo._free(ptr)
 	return board
 }
 
